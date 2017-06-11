@@ -1,16 +1,15 @@
 #pragma once
-//¬ариант 6.
+//Задания на лабораторную работу
+//Вариант 6.
 
 #include <iostream>
 #include <string>
-#include <climits>
-#include <fstream>
 
 using namespace std;
 
 class Long_int
 {
-	static unsigned int count_objects; //статическа¤ переменна¤, считающа количество созданных за всю работу программы объектов
+	static unsigned int count_objects; //статическая переменная, считающа количество созданных за всю работу программы объектов
 	int len;
 	int *arr; // указатель на массив
 	bool negative; //знак числа
@@ -23,25 +22,20 @@ class Long_int
 	void reduce_size_array(int length);
 public:
 	Long_int();
-	Long_int(char *buff);
+	~Long_int(); //деструктор
+	Long_int(char *values); // конструктор класса для ввода с экрана
 	Long_int(const Long_int &object); // конструктор копирования
+	Long_int summary(Long_int &val2);
+	Long_int substraction(Long_int &val1);
+	Long_int summand(Long_int &val1);
+	Long_int division(Long_int &val1);
+	Long_int & operator = (const Long_int &object);// перегрузка оператора присваивания
 	bool operator == (const Long_int &object);
 	bool operator != (const Long_int &object);
-	Long_int & operator = (const Long_int &object);// перегрузка оператора присваивания
-	Long_int operator * (Long_int &val2);
-	Long_int operator / (Long_int &val2);
-	Long_int operator + (Long_int &val2);
-	Long_int operator - (Long_int &val2);
-	Long_int & operator ++ ();
-	Long_int operator -- (int);
-	friend istream & operator >> (istream &in, Long_int &object);
-	friend ostream & operator << (ostream &out, Long_int &object);
-	friend ofstream & operator << (ofstream & out, Long_int &object);
-	friend ifstream & operator >> (ifstream & in, Long_int &object);
 	long long to_long();
-	const char *get_symbol();
+	const char* get_symbol();
 	int get_length();
 	int get_digit(int index);
 	static unsigned int get_count_objects();
-	~Long_int(); //деструктор
+	friend ostream & operator << (ostream &out, Long_int &object);
 };
