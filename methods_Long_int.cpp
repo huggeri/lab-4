@@ -1,43 +1,38 @@
-#include "Long_int2.h"
+#include "Long_int.h"
 
 unsigned int Long_int::count_objects = 0;
-
+//конструктор для записи значнеия из строки
 Long_int::Long_int() : len(1), negative(false)
 {
-	arr = new int(0);
+	arr = new int(1);
 	count_objects++;
 } // конструктор класса по умолчанию
 
-Long_int::Long_int(char *buff)
+Long_int::Long_int(char *values)
 {
 	negative = false;
-	len = strlen(buff); // длина массива
-
-	if (len != 0)
+	len = strlen(values); // длина массива
+	int i = 0;
+	if (values[0] == '-') // убрали знак из числа
 	{
-		for (int i = 0; i < len; i++)
-		{
-			while ((buff[i] < '0' || buff[i] > '9') && buff[i] != '\0')
-			{
-				if (buff[i] == '-')
-					negative = true;
-				for (int j = i; buff[j] != '\0'; j++)
-					buff[j] = buff[j + 1];
-				len--;
-			}
-		}
+		negative = true;
+		len--;
 	}
 	if (len != 0)
 	{
 		arr = new int[len]; // создали массив
-		for (int i = 0; i < len; i++)
-			arr[i] = buff[i] - '0'; // заполнили массив
+		for (i; i < len; i++)
+		{
+			if (negative)
+				arr[i] = values[i + 1] - '0'; // заполнили массив
+			else
+				arr[i] = values[i] - '0'; // заполнили массив
+		}
 	}
 	else
 	{
 		arr = new int(0);
 		len = 1;
-		negative = false;
 	}
 	count_objects++;
 }
@@ -56,19 +51,20 @@ int Long_int::get_length()
 	return len;
 }
 //сложение
-Long_int Long_int::operator + (Long_int &val2)
+Long_int Long_int::summary(Long_int &val2)
 {
 	Long_int temp;
+	temp.arr[0] = 0;
 	int change_symbols = 0;
 	work_with_symbols(val2, 1, change_symbols); // меняем символы, чтобы избежать циклического вызова
 
 	if (change_symbols == 1)
 	{
-		temp = *this - val2;
+		temp = substraction(val2);
 	}
 	else if (change_symbols == -1)
 	{
-		temp = val2 - *this;
+		temp = val2.substraction(*this);
 	}
 	else
 	{
@@ -140,17 +136,22 @@ Long_int Long_int::operator + (Long_int &val2)
 	return temp;
 }
 //вычитание
-Long_int Long_int::operator - (Long_int &val2)
+Long_int Long_int::substraction(Long_int &val2)
 {
 	int comp = 0;
 	int change_symbols = 0;
 	Long_int temp;
+	temp.arr[0] = 0;
 
 	work_with_symbols(val2, 1, change_symbols);
 
-	if (change_symbols == 1 || change_symbols == -1)
+	if (change_symbols == 1)
 	{
-		temp = *this + val2;
+		temp = summary(val2);
+	}
+	else if (change_symbols == -1)
+	{
+		temp = summary(val2);
 	}
 	else
 	{
@@ -241,20 +242,22 @@ Long_int Long_int::operator - (Long_int &val2)
 	return temp;
 }
 //умножение
-Long_int Long_int::operator * (Long_int &val2)
+Long_int Long_int::summand(Long_int &val2)
 {	//пока счетчик - массив не равен второму множителю, делаем сложение
 	Long_int temp;
+	temp.arr[0] = 0;
 
 	if (!null(val2))
 	{
 		int change_symbols = 0;
 		work_with_symbols(val2, 1, change_symbols);
-		Long_int factor_second;// пустой массив для накопления результата
+		Long_int cnt;
+		Long_int factor_second(temp);// пустой массив для накопления результата
 
 		while (val2 != factor_second)//пока массивы не равны
 		{
-			temp = temp + *this; // складываем пустой массив и 1 множ
-			++factor_second; //складываем пустой массив и 1 - счетчик
+			temp = temp.summary(*this); // складываем пустой массив и 1 множ
+			factor_second = factor_second.summary(cnt); //складываем пустой массив и 1 - счетчик
 		} //копируем счетчик в другой массив, чтобы снова сложить
 		if (change_symbols == -1 || change_symbols == 1)
 		{
@@ -266,9 +269,10 @@ Long_int Long_int::operator * (Long_int &val2)
 	return temp;
 }
 //деление
-Long_int Long_int::operator / (Long_int &val2)// что делим, на что делим, куда пишем результат
+Long_int Long_int::division(Long_int &val2)// что делим, на что делим, куда пишем результат
 {
 	Long_int temp;
+	temp.arr[0] = 0;
 
 	if (!null(val2))
 	{
@@ -280,10 +284,11 @@ Long_int Long_int::operator / (Long_int &val2)// что делим, на что 
 		if (comp > 0) // если результат сравнения больше 0, то присваиваем этой переменной значение остатка
 		{
 			Long_int dividend(*this);
+			Long_int cnt;
 			while (dividend.compare(val2) >= 0)// пока делимое больше делителя
 			{
-				dividend = dividend - val2;// вычитаем из делимого делитель
-				++temp;
+				dividend = dividend.substraction(val2);// вычитаем из делимого делитель
+				temp = temp.summary(cnt);
 			}
 		}
 		else if (comp == 0)
@@ -320,11 +325,11 @@ int Long_int::get_digit(int index)
 {
 	int digit = -1;
 	if (index < len && index >= 0)
-		digit = arr[len - 1 - index];
+		digit = arr[index];
 	return digit;
 }
 
-const char *Long_int::get_symbol()
+const char* Long_int::get_symbol()
 {
 	const char *s = "";
 	if (negative)
@@ -343,7 +348,7 @@ void Long_int::copyr(int *arr1, int len1, int *arr2, int len2)
 	}
 }
 //сравнение значений в массивах
-int Long_int::compare(const Long_int &val2)
+int Long_int::compare(const Long_int &val2 )
 {
 	int result_compare = 0;
 	int i = 0, j = 0;
@@ -488,7 +493,7 @@ void Long_int::reduce_size_array(int length)
 		arr = new int(0);
 		len = 1;
 	}
-	else if (len > length)
+	else if(len > length)
 	{
 		int *sub_arr = new int[len - length];
 		for (int i = 0; i < len - length; i++)
@@ -533,79 +538,9 @@ bool Long_int::operator == (const Long_int &object)
 bool Long_int::operator != (const Long_int &object)
 {
 	bool result = true;
-	if (*this == object)
+	if(*this == object)
 		result = false;
 	return result;
-}
-
-Long_int & Long_int::operator ++ ()
-{
-	int i = len - 1;
-	if (!negative)
-	{
-		++arr[i];
-		while (arr[i] == 10 && i > 0)
-		{
-			arr[i] = 0;
-			arr[--i]++;
-		}
-		if (arr[i] == 10 && i == 0)
-		{
-			arr[i] = 0;
-			up_size_array(1);
-			arr[i] = 1;
-		}
-	}
-	else
-	{
-		--arr[i];
-		while (arr[i] == -1 && i > 0)
-		{
-			arr[i] = 9;
-			arr[--i]--;
-		}
-		if (len == 1 && arr[0] == 0)
-			negative = false;
-	}
-	clean_arr();
-	return *this;
-}
-
-Long_int Long_int::operator -- (int)
-{
-	Long_int temp(*this);
-	int i = len - 1;
-	if (!negative)
-	{
-		arr[i]--;
-		while (arr[i] == -1 && i > 0)
-		{
-			arr[i] = 9;
-			arr[--i]--;
-		}
-		if (len == 1 && arr[0] == -1)
-		{
-			arr[0] = 1;
-			negative = true;
-		}
-	}
-	else
-	{
-		arr[i]++;
-		while (arr[i] == 10 && i > 0)
-		{
-			arr[i] = 0;
-			arr[--i]++;
-		}
-		if (arr[i] == 10 && i == 0)
-		{
-			arr[i] = 0;
-			up_size_array(1);
-			arr[i] = 1;
-		}
-	}
-	clean_arr();
-	return temp;
 }
 //деструктор
 Long_int::~Long_int()
@@ -620,30 +555,4 @@ ostream & operator << (ostream &out, Long_int &object)
 	for (int i = 0; i < object.len; i++)
 		out << object.arr[i];
 	return out;
-}
-
-istream & operator >> (istream &in, Long_int &object)
-{
-	char buff[100];
-	in >> buff;
-	Long_int temp(buff);
-	object = temp;
-	return in;
-}
-
-ofstream & operator << (ofstream & out, Long_int &object)
-{
-	out << object.get_symbol();
-	for (int i = 0; i < object.len; i++)
-		out << object.arr[i];
-	return out;
-}
-
-ifstream & operator >> (ifstream & in, Long_int &object)
-{
-	char buff[100];
-	in.getline(buff, 100);
-	Long_int temp(buff);
-	object = temp;
-	return in;
 }
