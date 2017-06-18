@@ -1,37 +1,47 @@
-//дек
+ //дек
 #pragma once
 #include <iostream>
 using namespace std;
 
-template <class T = Long_int, int size = 10> 
-class Item // шаблон одной записи, хранящей указатель на объект T и порядковый номер записи
+template <typename T = Long_int, int size = 10>
+class Dack
 {
 public:
-	int num; // порядковый номер записи
-	T *info; // указатель на объект вложенного класса
-	Item *next, *prev; // указатели на след. и пред. записи
-	Item(); // для создания списка
-	Item(T &b);
-	//Item *get_next() { return next; } // вернуть указатель на след.
-	//Item *get_prev() { return prev; } // вернуть указатель на предыдущ
-	//int get_num() { return num; }
-	//T *get_info() { return info; }
-	void set_info(T &b);// записать новую инфу в объект - запись
-	void get_info(T &b);// записать инфу из записи в объект b
-	~Item();
+	class Item // шаблон одной записи, хранящей указатель на объект T и порядковый номер записи
+	{
+	protected:
+		friend class Dack;
+		int num; // порядковый номер записи
+		T *info; // указатель на объект вложенного класса
+		Item *next, *prev; // указатели на след. и пред. записи
+	public:
+		Item(T &b);
+		~Item();
+
+		inline void set_info(T &b);// записать новую инфу в объект - запись
+		inline void get_info(T &b);// записать инфу из записи в объект b
+		inline T *show_info() const;
+		inline Item *get_next() const;
+		inline Item *get_prev() const;
+		inline int get_num() const;
+	};
+	Dack <T, size>();
+	~Dack();
+
+	void push(Item &elem); // добавить в конец
+	void pop_from_beg(); // убрать с начала: начало теперь next, prev у next теперь NULL
+	void pop_from_end(); // убрать с конца
+	inline Item *get_beg(); // получить значение указателя на первый элемент
+	inline Item *get_end(); // получить значение указателя на последний элемент
+	inline int get_top() const;
+	Item *peek(int number);
+protected:
+	int top;
+	Item *beg, *end; //указатели на начало и конец списка
 };
 
-template <class T, int size>
-Item <T, size> :: Item()
-{
-	num = 0;
-	info = 0; // присвоение ссылки
-	next = 0;
-	prev = 0;
-}
-
-template <class T, int size>
-Item <T, size> :: Item(T &b) // при создании записи подаётся ссылка на объект
+template <typename T, int size>
+Dack <T, size>::Item::Item(T &b) // при создании записи подаётся ссылка на объект
 {
 	info = &b; // присвоение ссылки
 	next = 0;
@@ -39,50 +49,56 @@ Item <T, size> :: Item(T &b) // при создании записи подаё�
 	num = 1;
 }
 
-template <class T, int size>
-void Item <T, size> :: set_info(T &b) 
-{ 
-	info = &b; 
+template <typename T, int size>
+inline void Dack <T, size>::Item::set_info(T &b)
+{
+	info = &b;
 }
 
-template <class T, int size>
-void Item <T, size> :: get_info(T &b) 
-{ 
-	b = *info; 
+template <typename T, int size>
+inline void Dack <T, size>::Item::get_info(T &b)
+{
+	b = *info;
 }
 
-template <class T, int size>
-Item <T, size> :: ~Item()
+template <typename T, int size>
+inline T * Dack <T, size>::Item::show_info() const
+{
+	return info;
+}
+
+template <typename T, int size>
+inline typename Dack <T, size>::Item * Dack <T, size>::Item::get_next() const
+{
+	return next;
+}
+
+template <typename T, int size>
+inline typename Dack <T, size>::Item * Dack <T, size>::Item::get_prev() const
+{
+	return prev;
+}
+
+template <typename T, int size>
+inline int Dack <T, size>::Item::get_num() const
+{
+	return num;
+}
+
+template <typename T, int size>
+Dack <T, size>::Item::~Item()
 {
 }
 
-template <class T = Long_int, int size = 10>
-class Dack : public Item <T, size>
-{
-protected:
-	int top;
-	Item <T, size> *beg, *end; //указатели на начало и конец списка
-public:
-	Dack <T, size>();
-	~Dack();
-	void push(Item &elem); // добавить в конец
-	void pop_from_beg(); // убрать с начала: начало теперь next, prev у next теперь NULL
-	void pop_from_end(); // убрать с конца
-	Item <T, size> *get_beg(); // получить значение указателя на первый элемент
-	Item <T, size> *get_end(); // получить значение указателя на последний элемент
-	int get_top();
-	Item <T, size> *output_item(int number); //вернуть адрес записи по номеру/
-};
-
-template <class T, int size>
-Dack <T, size> :: Dack() : Item()
+template <typename T, int size>
+Dack <T, size>::Dack()
 {
 	beg = end = 0;
 	top = 0;
 }
 
-template <class T, int size>
-void Dack <T, size> :: push(Item &elem) // добавить в конец
+template <typename T, int size>
+void Dack <T, size>::push(Item &elem) // добавить в конец
 { // создали запись в мэйне
 	if (top >= size) //если дек заполнен
 		throw std::exception("Maximum count of nodes!");
@@ -98,10 +114,10 @@ void Dack <T, size> :: push(Item &elem) // добавить в конец
 		elem.num = elem.prev->num + 1;
 }
 
-template <class T, int size>
-void Dack <T, size> :: pop_from_beg() // убрать с начала: начало теперь next, prev у next теперь NULL
+template <typename T, int size>
+void Dack <T, size>::pop_from_beg() // убрать с начала: начало теперь next, prev у next теперь NULL
 {
-	Item <T, size> *a = beg;
+	Item *a = beg;
 	if (beg)
 	{
 		if (beg->next)
@@ -124,10 +140,10 @@ void Dack <T, size> :: pop_from_beg() // убрать с начала: нача�
 	}
 }
 
-template <class T, int size>
-void Dack <T, size> :: pop_from_end() // убрать с конца
+template <typename T, int size>
+void Dack <T, size>::pop_from_end() // убрать с конца
 {
-	Item <T, size> *a = end;
+	Item *a = end;
 	if (end)
 	{
 		if (end->prev)
@@ -141,28 +157,28 @@ void Dack <T, size> :: pop_from_end() // убрать с конца
 	}
 }
 
-template <class T, int size>
-Item <T, size> * Dack <T, size> :: get_beg() // получить значение указателя на первый элемент
+template <typename T, int size>
+inline typename Dack <T, size>::Item *get_beg() // получить значение указателя на первый элемент
 {
 	return beg;
 }
 
-template <class T, int size>
-Item <T, size> * Dack <T, size> :: get_end() // получить значение указателя на последний элемент
+template <typename T, int size>
+inline typename Dack <T, size>::Item *get_end() // получить значение указателя на последний элемент
 {
 	return end;
 }
 
-template <class T, int size>
-int Dack <T, size> :: get_top() 
+template <typename T, int size>
+inline int Dack <T, size>::get_top() const
 { 
 	return top;
 }
 
-template <class T, int size>
-Item <T, size> * Dack <T, size> :: output_item(int number) //вернуть адрес записи по номеру/
+template <typename T, int size>
+typename Dack <T, size>::Item * Dack <T, size>::peek(int number) //вернуть адрес записи по номеру/
 {
-	Item <T, size> *a = beg;
+	Item *a = beg;
 	while (a)
 	{
 		if (a->num == number)
@@ -172,10 +188,10 @@ Item <T, size> * Dack <T, size> :: output_item(int number) //вернуть ад
 	return a;
 }
 
-template <class T, int size> 
-Dack <T, size> :: ~Dack()
+template <typename T, int size>
+Dack <T, size>::~Dack()
 {
-	Item <T, size> *a, *b;
+	Item *a, *b;
 	a = beg;
 	while (a) // пока начальный элемент не пуст (существует)
 	{
